@@ -31,17 +31,27 @@ public class AuthService {
     }
 
     public AuthResponse login(AuthRequest request){
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getUsername(),
-                        request.getPassword()
-                )
-        );
+        try {
+            // This line performs the password check. If it fails, it throws an exception.
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getUsername(),
+                            request.getPassword()
+                    )
+            );
+        } catch (Exception e) {
+            // This block will execute if authentication fails, printing the error.
+            System.out.println("!!! AUTHENTICATION FAILED !!!");
+            System.out.println("Error Type: " + e.getClass().getSimpleName());
+            System.out.println("Error Message: " + e.getMessage());
+            // Re-throw the exception to ensure the 403 response is still sent to the frontend
+            throw e;
+        }
+
+        // This code only runs if authentication was successful.
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow();
-
         var jwtToken = jwtService.generateToken(user);
         return AuthResponse.builder().token(jwtToken).build();
     }
-
 }

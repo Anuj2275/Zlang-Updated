@@ -14,6 +14,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+
+//enables clean, constructor-based dependency injection
 @RequiredArgsConstructor  //ensures that application config cannot be created without a user repo
 public class ApplicationConfig {
     private final UserRepository userRepository;
@@ -32,8 +34,8 @@ public class ApplicationConfig {
     @Bean
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService());
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setUserDetailsService(userDetailsService()); // tells the provider how to find the users
+        authProvider.setPasswordEncoder(passwordEncoder()); // tells the provider how to check passwords
 
         return authProvider;
     }

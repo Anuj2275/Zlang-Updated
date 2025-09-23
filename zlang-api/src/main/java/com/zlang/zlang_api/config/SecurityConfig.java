@@ -3,6 +3,7 @@ package com.zlang.zlang_api.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -29,12 +30,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // This line tells Spring Security to apply the CORS configuration
-                // defined in the `corsConfigurationSource` bean below.
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/slangs/**").permitAll()
+
+                        // Protected endpoints for authenticated users
+                        .requestMatchers(HttpMethod.POST, "/api/slangs").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/slangs/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/slangs/**").authenticated()
+
+                        // Secure all other requests
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -44,21 +52,14 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /**
-     * This bean defines our "Foreign Relations Treaty" (CORS configuration).
-     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // The most important line: explicitly name the kingdom we are friends with.
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
-        // Define which diplomatic actions (HTTP methods) they are allowed to take.
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // Allow them to present any type of credentials (HTTP headers).
         configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply this treaty to all roads within our API kingdom.
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }

@@ -1,5 +1,5 @@
 package com.zlang.zlang_api.service;
-
+// main work--> generate (jwt) -> parsing (read claims from given token) -> validation
 import com.zlang.zlang_api.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -41,7 +41,7 @@ public class JwtService {
     public String generateToken(
             Map<String, Object> extraClaims,
             UserDetails userDetails
-    ) {
+    ) { // core id card manufacturing process
         return Jwts
                 .builder()
                 .setClaims(extraClaims)

@@ -33,7 +33,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
+        // --- START OF DEBUGGING ---
+        System.out.println("\n--- JWT AUTH FILTER ---");
+        System.out.println("Request URI: " + request.getRequestURI());
+        System.out.println("Authorization Header: " + authHeader);
+        // --- END OF DEBUGGING ---
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("No JWT Token found in Authorization Header. Passing to next filter.");
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,18 +48,29 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt = authHeader.substring(7);
         final String username = jwtService.extractUsername(jwt);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        // --- MORE DEBUGGING ---
+        System.out.println("Extracted JWT: " + jwt);
+        System.out.println("Extracted Username: " + username);
+        // --- END OF DEBUGGING ---
 
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
             if (jwtService.isTokenValid(jwt, userDetails)) {
+                // --- SUCCESS DEBUGGING ---
+                System.out.println("Token is VALID. Authenticating user.");
+                // --- END OF DEBUGGING ---
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
                         userDetails.getAuthorities()
                 );
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken); //** uses a threalocal storage strategy, each rq get a unique thread 
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            } else {
+                // --- FAILURE DEBUGGING ---
+                System.out.println("Token is INVALID.");
+                // --- END OF DEBUGGING ---
             }
         }
         filterChain.doFilter(request, response);
