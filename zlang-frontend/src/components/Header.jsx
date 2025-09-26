@@ -10,18 +10,21 @@ const Header = ({ user, onLogout, setCurrentPage }) => {
                 >
                     Z-Lang <span className="text-lime-400">.</span>
                 </div>
-                <div className="flex items-center space-x-4">
-                    <button onClick={() => setCurrentPage('mySlangs')} className="hidden sm:block text-sm font-semibold text-gray-300 hover:text-white">My Slangs</button>
-                    <button onClick={() => setCurrentPage('savedSlangs')} className="hidden sm:block text-sm font-semibold text-gray-300 hover:text-white">Saved Slangs</button>
-                    <span className="hidden sm:block text-sm text-gray-400">
-                        Welcome, <span className="font-bold text-white">{user.name}</span>
-                    </span>
-                    <button
-                        onClick={onLogout}
-                        className="px-4 py-2 text-sm font-semibold text-lime-400 bg-lime-400/10 rounded-lg hover:bg-lime-400/20 transition-colors"
-                    >
-                        Logout
-                    </button>
+                <div className="flex items-center space-x-4 md:space-x-6">
+                    <button onClick={() => setCurrentPage('mySlangs')} className="hidden sm:block text-sm font-semibold text-gray-300 hover:text-white transition-colors">My Slangs</button>
+                    <button onClick={() => setCurrentPage('savedSlangs')} className="hidden sm:block text-sm font-semibold text-gray-300 hover:text-white transition-colors">Saved Slangs</button>
+                    <button onClick={() => setCurrentPage('leaderboard')} className="hidden sm:block text-sm font-semibold text-gray-300 hover:text-white transition-colors">Leaderboard</button>
+                    <div className="hidden md:flex items-center space-x-4">
+                        <span className="text-sm text-gray-400">
+                            Welcome, <span className="font-bold text-white">{user.name}</span>
+                        </span>
+                        <button
+                            onClick={onLogout}
+                            className="px-4 py-2 text-sm font-semibold text-lime-400 bg-lime-400/10 rounded-lg hover:bg-lime-400/20 transition-colors"
+                        >
+                            Logout
+                        </button>
+                    </div>
                 </div>
             </nav>
         </header>

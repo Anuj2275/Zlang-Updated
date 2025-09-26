@@ -1,5 +1,5 @@
 package com.zlang.zlang_api.dto;
-
+//It's like a temporary envelope for the user's information.
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

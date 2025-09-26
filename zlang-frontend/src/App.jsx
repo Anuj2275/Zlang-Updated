@@ -3,9 +3,7 @@ import HomePage from './pages/HomePage';
 import DashboardPage from './pages/DashboardPage';
 import Notification from './components/Notification';
 
-// Your Google AI API Key
-const GEMINI_API_KEY = 'AIzaSyD20hZhA4KcNoxJ1SWWU2uCwF9t80gnf_E'; // [DO NOT COMMIT THIS KEY TO A PUBLIC REPOSITORY]
-
+const GEMINI_API_KEY = 'AIzaSyD20hZhA4KcNoxJ1SWWU2uCwF9t80gnf_E';
 const parseJwt = (token) => {
     try {
         return JSON.parse(atob(token.split('.')[1]));

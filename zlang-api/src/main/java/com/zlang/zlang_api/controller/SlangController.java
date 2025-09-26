@@ -1,6 +1,8 @@
 package com.zlang.zlang_api.controller;
 
+import com.zlang.zlang_api.dto.LeaderboardDTO;
 import com.zlang.zlang_api.dto.SlangRequest;
+import com.zlang.zlang_api.dto.SlangResponseDTO;
 import com.zlang.zlang_api.model.Slang;
 import com.zlang.zlang_api.model.User;
 import com.zlang.zlang_api.service.SlangService;
@@ -19,7 +21,7 @@ public class SlangController {
     private final SlangService slangService;
 
     @GetMapping("/search")
-    public ResponseEntity<List<Slang>> searchSlangs(@RequestParam(defaultValue = "") String query) {
+    public ResponseEntity<List<SlangResponseDTO>> searchSlangs(@RequestParam(defaultValue = "") String query) {
         return ResponseEntity.ok(slangService.search(query));
     }
 
@@ -44,7 +46,7 @@ public class SlangController {
     }
 
     @GetMapping("/saved")
-    public ResponseEntity<List<Slang>> getSavedSlangs(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<SlangResponseDTO>> getSavedSlangs(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(slangService.getSavedSlangs(currentUser));
     }
 
@@ -61,7 +63,22 @@ public class SlangController {
     }
 
     @GetMapping("/my-slangs")
-    public ResponseEntity<List<Slang>> getMySlangs(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<List<SlangResponseDTO>> getMySlangs(@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(slangService.getMySlangs(currentUser));
+    }
+
+    @PostMapping("/{slangId}/upvote")
+    public ResponseEntity<Slang> upvoteSlang(@PathVariable String slangId, @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(slangService.upvoteSlang(slangId, currentUser));
+    }
+
+    @PostMapping("/{slangId}/downvote")
+    public ResponseEntity<Slang> downvoteSlang(@PathVariable String slangId, @AuthenticationPrincipal User currentUser) {
+        return ResponseEntity.ok(slangService.downvoteSlang(slangId, currentUser));
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<LeaderboardDTO>> getLeaderboard() {
+        return ResponseEntity.ok(slangService.getLeaderboard());
     }
 }

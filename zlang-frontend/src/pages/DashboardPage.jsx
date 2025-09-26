@@ -8,6 +8,7 @@ import Modal from '../components/Modal';
 import SlangForm from '../components/SlangForm';
 import MySlangsPage from './MySlangsPage';
 import SavedSlangsPage from './SavedSlangsPage';
+import LeaderboardPage from './LeaderboardPage';
 
 const API_BASE_URL = 'http://localhost:8081/api';
 
@@ -36,7 +37,7 @@ const fetchSlangFromGemini = async (term, apiKey) => {
 
 const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
     const [slangs, setSlangs] = useState([]);
-    const [searchTerm, setSearchTerm] = useState(''); // <<< FIX: ADD THIS LINE
+    const [searchTerm, setSearchTerm] = useState('');
     const [aiSlang, setAiSlang] = useState(null);
     const [searchLoading, setSearchLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +63,6 @@ const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
         }
     }, [apiKey, setNotification]);
 
-    // <<< FIX: ADD THIS ENTIRE useEffect HOOK
     useEffect(() => {
         if (currentPage === 'dashboard') {
             const timer = setTimeout(() => {
@@ -71,7 +71,6 @@ const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
             return () => clearTimeout(timer);
         }
     }, [searchTerm, currentPage, fetchCommunitySlangs]);
-
 
     const openModal = (mode, slang = null) => {
         setModalMode(mode);
@@ -135,12 +134,46 @@ const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
         }
     };
 
+    const handleVote = async (voteType, slangId) => {
+        const endpoint = `${API_BASE_URL}/slangs/${slangId}/${voteType}`;
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) {
+                     setNotification({ message: 'You must be logged in to vote.', type: 'error' });
+                }
+                throw new Error('Vote failed.');
+            }
+
+            const updatedSlangData = await response.json();
+            const updatedSlang = {
+                ...updatedSlangData,
+                authorName: slangs.find(s => s.id === slangId)?.authorName || 'Unknown'
+            };
+
+            setSlangs(prevSlangs =>
+                prevSlangs.map(slang =>
+                    slang.id === slangId ? updatedSlang : slang
+                )
+            );
+
+        } catch (error) {
+            console.error(error.message);
+        }
+    };
+
     const renderPage = () => {
         switch (currentPage) {
             case 'mySlangs':
                 return <MySlangsPage user={user} setNotification={setNotification} />;
             case 'savedSlangs':
                 return <SavedSlangsPage user={user} setNotification={setNotification} />;
+            case 'leaderboard':
+                return <LeaderboardPage setNotification={setNotification} />;
             default:
                 return (
                     <>
@@ -167,6 +200,7 @@ const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
                                         onDelete={() => openModal('delete', slang)}
                                         onSave={() => handleSaveToggle(slang.id)}
                                         isSaved={savedSlangIds.has(slang.id)}
+                                        onVote={handleVote}
                                     />
                                 )}
                                 {!searchLoading && !aiSlang && slangs.length === 0 && (
