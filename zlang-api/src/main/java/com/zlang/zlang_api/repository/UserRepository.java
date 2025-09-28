@@ -6,9 +6,10 @@ import java.util.Optional; // write safe and bug-resistant code
 
 
 public interface UserRepository extends MongoRepository<User, String> {
-//this MongoRepo give us some methods like save,findbyid,findall,delte,...
+//(MongoRepository<User, String>)this MongoRepo give us some methods like save,findbyid,findall,delete,...
 
 
+    // derived query method, Spring data is smart enough to understand the name and auto generate the correct DB query
     Optional<User> findByUsername(String username);
 
 }

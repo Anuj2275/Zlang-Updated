@@ -57,15 +57,12 @@ class AuthServiceTest {
     @Test
     @DisplayName("Should successfully register a new user")
     void shouldSuccessfullyRegisterUser() {
-        // Arrange: Define the behavior of the mocked dependencies
         when(passwordEncoder.encode("password123")).thenReturn("hashedPassword123");
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(jwtService.generateToken(any(User.class))).thenReturn("mockJwtToken");
 
-        // Act: Call the method we want to test
         AuthResponse authResponse = authService.register(registerRequest);
 
-        // Assert: Verify the results
         assertNotNull(authResponse);
         assertEquals("mockJwtToken", authResponse.getToken());
     }

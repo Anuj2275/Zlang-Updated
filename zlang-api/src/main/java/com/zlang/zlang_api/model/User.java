@@ -18,15 +18,15 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "users")
+@Document(collection = "users")// doc tells Spring data, this class maps to users collection in DB
 public class User implements UserDetails {
 
-    @Id
+    @Id // primary key
     private String id;
 
     private String name;
 
-    @Indexed(unique = true)
+    @Indexed(unique = true) // create an index for fast lookups, no duplication
     private String username;
 
     private String password;

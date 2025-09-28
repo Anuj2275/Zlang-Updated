@@ -28,48 +28,42 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            @NonNull FilterChain filterChain
+            @NonNull FilterChain filterChain // processes the req
     ) throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // --- START OF DEBUGGING ---
-        System.out.println("\n--- JWT AUTH FILTER ---");
-        System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Authorization Header: " + authHeader);
-        // --- END OF DEBUGGING ---
+//        System.out.println("\n--- JWT AUTH FILTER ---");
+//        System.out.println("Request URI: " + request.getRequestURI());
+//        System.out.println("Authorization Header: " + authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("No JWT Token found in Authorization Header. Passing to next filter.");
+//            System.out.println("No JWT Token found in Authorization Header. Passing to next filter.");
             filterChain.doFilter(request, response);
             return;
         }
 
         final String jwt = authHeader.substring(7);
-        final String username = jwtService.extractUsername(jwt);
+        final String username = jwtService.extractUsername(jwt); // extracts the username from the subject claim
 
-        // --- MORE DEBUGGING ---
-        System.out.println("Extracted JWT: " + jwt);
-        System.out.println("Extracted Username: " + username);
-        // --- END OF DEBUGGING ---
+//        System.out.println("Extracted JWT: " + jwt);
+//        System.out.println("Extracted Username: " + username);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) { // checks to see if spring sec has already authenticated this user during this same req
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                System.out.println("Token is VALID. Authenticating user.");
-                // --- END OF DEBUGGING ---
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                // --- FAILURE DEBUGGING ---
-                System.out.println("Token is INVALID.");
-                // --- END OF DEBUGGING ---
+            try {
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+//                    System.out.println("Token is VALID. Authenticating user.");
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+//                throw new RuntimeException(e);
             }
         }
         filterChain.doFilter(request, response);

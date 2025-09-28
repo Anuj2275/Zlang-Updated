@@ -43,12 +43,12 @@ public class JwtService {
             UserDetails userDetails
     ) { // core id card manufacturing process
         return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
+                .builder() // to construct token
+                .setClaims(extraClaims)  // add id and name
+                .setSubject(userDetails.getUsername())  // we are using username for subject -- standard claim
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // 24 hours
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256)
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // signs token using secret key in app.properties, guarantees token has not been tampered with.
                 .compact();
     }
 

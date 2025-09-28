@@ -33,16 +33,14 @@ public class SecurityConfig {
                 .cors(withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/slangs/**").permitAll()
 
-                        // Protected endpoints for authenticated users
                         .requestMatchers(HttpMethod.POST, "/api/slangs").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/slangs/**").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/slangs/**").authenticated()
 
-                        // Secure all other requests
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

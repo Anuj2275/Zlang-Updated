@@ -11,8 +11,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
+@Service //service component, business rules
+@RequiredArgsConstructor // auto creation of constructor and injects dependencies declared with private final (DI),(like userRepo,passwrEnco)
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -20,35 +20,33 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request){
-        var user = User.builder()
+        var user = User.builder() // create new user obj, data comes from req DTO
                 .name(request.getName())
                 .username(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .password(passwordEncoder.encode(request.getPassword())) // hashed pass is gener... when logging in hashes are compared
                 .build();
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateToken(user);// goes to JWT service
         return AuthResponse.builder().token(jwtToken).build();
     }
 
+// first finds the user in DB where it uses user details service bean
+// once it has user obj(include hashed pass) now we to verify pass typed by user   -- here it uses passwordEncoder
     public AuthResponse login(AuthRequest request){
         try {
-            // This line performs the password check. If it fails, it throws an exception.
-            authenticationManager.authenticate(
+            authenticationManager.authenticate( // this tiggers spring security's entire authentication prscs... --> creates UsernamePasswordAuthenticationToken (temp login req) and hand it off to AuthenticationManager
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
                             request.getPassword()
                     )
             );
         } catch (Exception e) {
-            // This block will execute if authentication fails, printing the error.
             System.out.println("!!! AUTHENTICATION FAILED !!!");
             System.out.println("Error Type: " + e.getClass().getSimpleName());
             System.out.println("Error Message: " + e.getMessage());
-            // Re-throw the exception to ensure the 403 response is still sent to the frontend
             throw e;
         }
 
-        // This code only runs if authentication was successful.
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);

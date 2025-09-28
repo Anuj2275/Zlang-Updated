@@ -22,7 +22,7 @@ public class ApplicationConfig {
 
     @Bean
     public UserDetailsService userDetailsService(){
-        return  username -> userRepository.findByUsername(username)
+        return  username -> userRepository.findByUsername(username) // find user in DB
                 .orElseThrow(()-> new UsernameNotFoundException("User not found with username: "+username));
     }
 
@@ -31,7 +31,7 @@ public class ApplicationConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+    @Bean // this ties the userDetailsService and the PasswordEncoder together
     public AuthenticationProvider authenticationProvider(){
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService()); // tells the provider how to find the users
@@ -40,7 +40,7 @@ public class ApplicationConfig {
         return authProvider;
     }
 
-    @Bean
+    @Bean  // it uses the the AuthenticationProvider
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception{
         return config.getAuthenticationManager();
     }
