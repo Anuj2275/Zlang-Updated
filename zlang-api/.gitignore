@@ -31,3 +31,6 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# zlang-api/.gitignore
+src/main/resources/application-local.properties
