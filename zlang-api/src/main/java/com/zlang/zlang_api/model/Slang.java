@@ -31,7 +31,6 @@ public class Slang {
 
     private String authorId;
 
-    // Add these two new fields for voting
     @Builder.Default
     private List<String> upvotedBy = new ArrayList<>();
 

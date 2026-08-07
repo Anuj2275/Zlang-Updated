@@ -26,7 +26,7 @@ public class SlangController {
     }
 
     @PostMapping
-    public ResponseEntity<Slang> createSlang(@RequestBody SlangRequest request, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<Slang> createSlang(@RequestBody SlangRequest request, @AuthenticationPrincipal User currentUser) { //AuthenticationPrincipal -> auto-injects the complete user object from db for the currently logged-in user directly into this method
         return ResponseEntity.ok(slangService.create(request, currentUser));
     }
 

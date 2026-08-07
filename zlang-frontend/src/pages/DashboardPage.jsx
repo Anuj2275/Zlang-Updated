@@ -11,29 +11,78 @@ import SavedSlangsPage from './SavedSlangsPage';
 import LeaderboardPage from './LeaderboardPage';
 
 const API_BASE_URL = 'http://localhost:8081/api';
-
 const fetchSlangFromGemini = async (term, apiKey) => {
     if (!apiKey || apiKey.includes('YOUR_GOOGLE_AI_API_KEY')) {
         console.warn("Gemini API key is not set. Skipping AI search.");
         return null;
     }
-    const prompt = `You are a slang dictionary. Define the slang term "${term}". Provide a concise meaning and a creative, realistic example sentence. Format your response as a JSON object with three keys: "term", "meaning", and "example". Provide only the JSON object.`;
+
+    const prompt = `You are a slang dictionary. Define the slang term "${term}".
+    Provide a concise meaning and a creative, realistic example sentence.
+    Format as JSON with keys: "term", "meaning", "example".
+    Provide only the JSON object.`;
+
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
     try {
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
         });
-        if (!response.ok) return null;
+
+        if (!response.ok) {
+            console.error("Gemini API error:", response.status, await response.text());
+            return null;
+        }
+
         const data = await response.json();
-        const jsonText = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
-        return JSON.parse(jsonText);
+        let jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        // Strip code fences if present
+        jsonText = jsonText.replace(/```json|```/g, "").trim();
+
+        try {
+            return JSON.parse(jsonText);
+        } catch (err) {
+            console.warn("Invalid JSON from Gemini. Falling back to text.");
+            return {
+                term,
+                meaning: jsonText,
+                example: "Example unavailable."
+            };
+        }
     } catch (error) {
         console.error("Failed to fetch or parse Gemini response:", error);
         return null;
     }
 };
+
+//
+// const fetchSlangFromGemini = async (term, apiKey) => {
+//     if (!apiKey || apiKey.includes('YOUR_GOOGLE_AI_API_KEY')) {
+//         console.warn("Gemini API key is not set. Skipping AI search.");
+//         return null;
+//     }
+//     const prompt = `You are a slang dictionary. Define the slang term "${term}". Provide a concise meaning and a creative, realistic example sentence. Format your response as a JSON object with three keys: "term", "meaning", and "example". Provide only the JSON object.`;
+//     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+//     try {
+//         const response = await fetch(url, {
+//             method: 'POST',
+//             headers: { 'Content-Type': 'application/json' },
+//             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+//         });
+//         if (!response.ok) return null;
+//         const data = await response.json();
+//         const jsonText = data.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim();
+//         return JSON.parse(jsonText);
+//     } catch (error) {
+//         console.error("Failed to fetch or parse Gemini response:", error);
+//         return null;
+//     }
+// };
 
 const DashboardPage = ({ user, onLogout, apiKey, setNotification }) => {
     const [slangs, setSlangs] = useState([]);

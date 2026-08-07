@@ -1,5 +1,5 @@
 package com.zlang.zlang_api.service;
-
+// Mokito allow us to test without any need of real DB
 import com.zlang.zlang_api.dto.AuthResponse;
 import com.zlang.zlang_api.dto.RegisterRequest;
 import com.zlang.zlang_api.model.User;
@@ -18,10 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+//below annotation from JUnit 5, tells teh test runner to activate Mockito frmwrk
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest {
 
-    @Mock
+    @Mock // creates a fake, controllable version of a class
     private UserRepository userRepository;
 
     @Mock
@@ -33,7 +34,7 @@ class AuthServiceTest {
     @Mock
     private AuthenticationManager authenticationManager;
 
-    @InjectMocks
+    @InjectMocks // create real instance of authService class
     private AuthService authService;
 
     private RegisterRequest registerRequest;
@@ -54,16 +55,21 @@ class AuthServiceTest {
                 .build();
     }
 
-    @Test
+    @Test // actual test case
     @DisplayName("Should successfully register a new user")
     void shouldSuccessfullyRegisterUser() {
+//        IMP - always follow this structure called - "ARRANGE , ACT, ASSERT" pattern
+
+//        ARRANGE
         when(passwordEncoder.encode("password123")).thenReturn("hashedPassword123");
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(jwtService.generateToken(any(User.class))).thenReturn("mockJwtToken");
 
+//        ACT
         AuthResponse authResponse = authService.register(registerRequest);
 
-        assertNotNull(authResponse);
-        assertEquals("mockJwtToken", authResponse.getToken());
+//        ASSERT -- checks if result of ACT step is what we expected
+        assertNotNull(authResponse); // here asserted that the method returned an obj and no null
+        assertEquals("mockJwtToken", authResponse.getToken()); // token inside the response obj is exact same token that jwtservice (mocked) was prgmed to rtrn
     }
 }

@@ -135,11 +135,15 @@ public class SlangService {
         return slangRepository.save(slang);
     }
 
+//    it used MongoTemplate, allows for more complex DB queries
     public List<LeaderboardDTO> getLeaderboard() {
+//        tell MGDB to grp all docs in slangs collection by authorId field, count no. of docs and assigns to a new filed named as slangCount
         GroupOperation groupByAuthor = Aggregation.group("authorId").count().as("slangCount");
+//      take grps and sorts in descending order based on count
         SortOperation sortByCount = Aggregation.sort(Sort.Direction.DESC, "slangCount");
         Aggregation aggregation = Aggregation.newAggregation(groupByAuthor, sortByCount);
 
+//        execute entire pipeline on slangs collection, result is a list of obj's, each item has id and slangCount
         AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, "slangs", Map.class);
         List<Map> mappedResults = results.getMappedResults();
 
